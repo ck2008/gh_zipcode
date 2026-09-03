@@ -19,6 +19,7 @@ window.PostalAddress = (() => {
     rest = district ? rest.slice(district.length) : rest;
     const villageMatch = rest.match(/^[^路街道]*?[村里]/);
     if (villageMatch && /(?:大道|路|街|道)/.test(rest.slice(villageMatch[0].length))) rest = rest.slice(villageMatch[0].length);
+    rest = rest.replace(/^\d+鄰/, "");
     const streetMatch = rest.match(/^(.*?(?:大道|路|街|道))/);
     const street = streetMatch?.[1] ?? "";
     rest = street ? rest.slice(street.length) : rest;
