@@ -1,0 +1,4 @@
+window.POSTAL_CONFIG = {
+  supabaseUrl: "https://skubqoeizqgbixaaxfeq.supabase.co",
+  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrdWJxb2VpenFnYml4YWF4ZmVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNzg3MjEsImV4cCI6MjEwMzk1NDcyMX0.fic_53me5BtbQFyFDcdCF6P3mPLmaP8i4jLFsxdymp0"
+};
