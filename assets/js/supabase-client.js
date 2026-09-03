@@ -13,7 +13,12 @@ window.PostalApi = (() => {
       headers: { "apikey": config.supabaseAnonKey, "Authorization": `Bearer ${config.supabaseAnonKey}`, "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
-    if (!response.ok) throw new Error(`${label}失敗（${response.status}）`);
+    if (!response.ok) {
+      // Rate limiting and other guard rails raise with a message meant for the
+      // reader, so prefer it over a bare status code.
+      const detail = await response.json().catch(() => null);
+      throw new Error(detail?.message ?? `${label}失敗（${response.status}）`);
+    }
     return response.json();
   }
   function lookup(values) {

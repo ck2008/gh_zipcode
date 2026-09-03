@@ -34,6 +34,8 @@
 
 留言預設 `is_approved = false`，不會顯示在頁面上。到 Supabase Table Editor 的 `guestbook.comment` 把要公開的那筆改成 `is_approved = true`（或在 SQL Editor 執行 `update guestbook.comment set is_approved = true where id = <id>;`）。刪除留言直接刪該列即可。
 
+每分鐘每個來源 IP 的上限：發驗證碼 20 次、送出留言 10 次（`0009_guestbook_rate_limit.sql`）。上限由 `guestbook.take_token()` 以固定一分鐘視窗計數，來源 IP 取自 PostgREST 傳給 SQL 的 `current_setting('request.headers')`——所以不需要在前面再擺一個 Edge Function。若該 header 哪天取不到，`client_key()` 會回傳 `unknown`，所有人共用一個桶而被一起限流（刻意不 fail-open）。`guestbook_list_comments` 不限流：它只讀已公開的資料，也不會產生任何列。
+
 ### 審核介面
 
 `admin/` 是審核頁，資料只有 GitHub 帳號 `ck2008`（numeric id `11531735`）看得到。
