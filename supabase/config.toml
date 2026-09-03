@@ -1,0 +1,6 @@
+project_id = "skubqoeizqgbixaaxfeq"
+
+[functions.zipcode]
+# This is intentionally a public compatibility API.  The function has its own
+# input validation and lightweight per-instance rate limiter.
+verify_jwt = false
