@@ -15,8 +15,8 @@
   <section class="guestbook" aria-labelledby="guestbook-title">
     <h2 id="guestbook-title">使用者留言</h2>
     <form id="comment-form">
-      <p class="field"><label for="comment-author">暱稱：</label><input id="comment-author" maxlength="40" autocomplete="nickname" required></p>
-      <p class="field"><label for="comment-body">留言：</label><textarea id="comment-body" rows="4" maxlength="1000" required></textarea></p>
+      <p class="field"><label for="comment-author">暱稱：</label><input id="comment-author" maxlength="10" autocomplete="nickname" required><span id="author-count" class="counter">0/10</span></p>
+      <p class="field"><label for="comment-body">留言：</label><textarea id="comment-body" rows="4" maxlength="100" required></textarea><span id="body-count" class="counter">0/100</span></p>
       <p class="field captcha"><label for="comment-captcha">驗證碼：</label><span id="captcha-image" class="captcha-image" aria-live="polite"></span><button type="button" id="captcha-reload">重新產生</button><input id="comment-captcha" maxlength="8" autocomplete="off" spellcheck="false" required></p>
       <p class="field actions"><button type="submit">送出留言</button></p>
     </form>

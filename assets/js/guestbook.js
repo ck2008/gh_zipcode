@@ -14,7 +14,7 @@
     captcha_wrong: "驗證碼不正確。每組驗證碼只能試一次，已換上新的一張，請重新輸入。",
     captcha_expired: "驗證碼已用過或逾時。已換上新的一張，請重新輸入。",
     empty: "暱稱與留言內容都不能空白。",
-    too_long: "暱稱最多 40 字、留言最多 1000 字。",
+    too_long: "暱稱最多 10 字、留言最多 100 字。",
     rate_limited: "留言太頻繁，請稍後再試。",
   };
   let token = "";
@@ -76,6 +76,13 @@
       submit.disabled = false;
     }
   });
+
+  for (const [field, label] of [[author, document.querySelector("#author-count")], [body, document.querySelector("#body-count")]]) {
+    const max = field.getAttribute("maxlength");
+    const show = () => { label.textContent = `${[...field.value].length}/${max}`; };
+    field.addEventListener("input", show);
+    show();
+  }
 
   reload.addEventListener("click", refreshCaptcha);
   refreshCaptcha();
