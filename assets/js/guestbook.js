@@ -11,8 +11,8 @@
   const submit = form.querySelector("button[type=submit]");
   const messages = {
     pending: "留言已送出，待站長審核後顯示。",
-    captcha_wrong: "驗證碼不正確，請重新輸入。",
-    captcha_expired: "驗證碼已失效，請使用新的驗證碼。",
+    captcha_wrong: "驗證碼不正確。每組驗證碼只能試一次，已換上新的一張，請重新輸入。",
+    captcha_expired: "驗證碼已用過或逾時。已換上新的一張，請重新輸入。",
     empty: "暱稱與留言內容都不能空白。",
     too_long: "暱稱最多 40 字、留言最多 1000 字。",
     rate_limited: "留言太頻繁，請稍後再試。",
