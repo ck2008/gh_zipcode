@@ -14,6 +14,7 @@ language sql stable security definer set search_path = postal, pg_temp as $$
       or (p_lane <> -1 and ps.record_type = p_record_type + 2 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type))
       or p_house_number = -1
       or (p_house_number = ps.house_number and (p_house_number_sub = -1 or ps.house_number_sub = p_house_number_sub or p_house_number_sub between ps.house_number_from_sub and ps.house_number_end_sub))
+      or (ps.record_type = 2 and ps.lane ~ '^[0-9]+$' and p_house_number between ps.house_number and ps.lane::integer and ps.number_type = p_number_type)
       or (p_house_number between ps.house_number_from and ps.house_number_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type)))
     )
     and (p_city = '' or ps.city_name = p_city)
