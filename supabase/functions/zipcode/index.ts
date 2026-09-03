@@ -6,6 +6,7 @@ type ParsedAddress = {
   city: string;
   district: string;
   street: string;
+  streetFallback: string;
   sector: string;
   neighborhood: number;
   lane: string;
@@ -55,7 +56,7 @@ function parseAddress(raw: string): ParsedAddress {
   const district = districtMatch?.[1] ?? "";
   rest = district ? rest.slice(district.length) : rest;
   const villageMatch = rest.match(/^[^路街道]*?[村里裡]/);
-  if (villageMatch && /(?:大道|路|街|道)/.test(rest.slice(villageMatch[0].length))) rest = rest.slice(villageMatch[0].length);
+  const streetFallback = villageMatch ? rest.slice(villageMatch[0].length).match(/^(.*?(?:大道|路|街|道))/)?.[1] ?? "" : "";
   rest = rest.replace(/^\d+鄰/, "");
   const streetMatch = rest.match(/^(.*?(?:大道|路|街|道))/);
   const street = streetMatch?.[1] ?? "";
@@ -70,12 +71,12 @@ function parseAddress(raw: string): ParsedAddress {
   const house = intValue(rest.match(/(\d+)號/)?.[1] ?? rest.match(/(\d+)之/)?.[1]);
   const houseSub = intValue(rest.match(/之(\d+)/)?.[1]);
   const floor = intValue(rest.match(/(\d+)樓/)?.[1]);
-  return { input, city, district, street, sector, neighborhood, lane, alley, house, houseSub, floor, numberType: house === -1 ? 0 : house % 2 === 0 ? 2 : 1 };
+  return { input, city, district, street, streetFallback, sector, neighborhood, lane, alley, house, houseSub, floor, numberType: house === -1 ? 0 : house % 2 === 0 ? 2 : 1 };
 }
 
 function attempts(parsed: ParsedAddress) {
   const baseline = { ...parsed, recordType: 0 };
-  return [
+  const candidates = [
     baseline,
     { ...baseline, floor: -1 },
     { ...baseline, floor: -1, house: -1, numberType: parsed.alley === -1 ? 0 : parsed.alley % 2 === 0 ? 2 : 1, recordType: 3 },
@@ -83,6 +84,7 @@ function attempts(parsed: ParsedAddress) {
     { ...baseline, floor: -1, house: -1, alley: -1, lane: "-1", numberType: 2, recordType: 1 },
     { ...baseline, floor: -1, house: -1, alley: -1, lane: "-1", neighborhood: -1, numberType: 2, recordType: 1 },
   ];
+  return parsed.streetFallback && parsed.streetFallback !== parsed.street ? [...candidates, ...candidates.map((candidate) => ({ ...candidate, street: parsed.streetFallback }))] : candidates;
 }
 
 function allow(request: Request) {
