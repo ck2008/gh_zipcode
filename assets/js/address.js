@@ -3,10 +3,11 @@ window.PostalAddress = (() => {
     "台北市": "臺北市", "北市": "臺北市", "台中市": "臺中市", "中市": "臺中市",
     "台南市": "臺南市", "南市": "臺南市", "台東縣": "臺東縣", "台東": "臺東縣"
   };
+  const cnToTw = window.OpenCC?.Converter?.({ from: "cn", to: "tw" }) ?? (value => value);
   const intValue = (value) => value === undefined ? -1 : Number(value);
   const chineseNumber = (value) => ({ "零": 0, "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "壹": 1, "貳": 2, "參": 3, "肆": 4, "伍": 5, "陸": 6, "柒": 7, "捌": 8, "玖": 9 })[value] ?? Number(value);
   function normalize(value) {
-    return String(value ?? "").normalize("NFKC").replace(/[　\s]+/g, "").replace(/臺/g, "台");
+    return cnToTw(String(value ?? "")).normalize("NFKC").replace(/[　\s]+/g, "").replace(/臺/g, "台");
   }
   function parse(raw) {
     const input = normalize(raw).replace(/^\d{3,6}(?=[^\d])/, "");
