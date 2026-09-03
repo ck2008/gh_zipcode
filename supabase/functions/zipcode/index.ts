@@ -56,9 +56,9 @@ function parseAddress(raw: string): ParsedAddress {
   const district = districtMatch?.[1] ?? "";
   rest = district ? rest.slice(district.length) : rest;
   const villageMatch = rest.match(/^[^路街道]*?[村里裡]/);
-  const streetFallback = villageMatch ? rest.slice(villageMatch[0].length).match(/^(.*?(?:大道|路|街|道))/)?.[1] ?? "" : "";
+  const streetFallback = villageMatch ? rest.slice(villageMatch[0].length).match(/^(.*(?:大道|路|街|道))/)?.[1] ?? "" : "";
   rest = rest.replace(/^\d+鄰/, "");
-  const streetMatch = rest.match(/^(.*?(?:大道|路|街|道))/);
+  const streetMatch = rest.match(/^(.*(?:大道|路|街|道))/);
   const street = streetMatch?.[1] ?? "";
   rest = street ? rest.slice(street.length) : rest;
   const sectorMatch = rest.match(/^([0-9０-９零一二三四五六七八九壹貳參肆伍陸柒捌玖]+)段/);
