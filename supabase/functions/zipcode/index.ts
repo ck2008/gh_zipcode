@@ -1,4 +1,4 @@
-import { Converter } from "npm:opencc-js";
+import { Converter } from "npm:opencc-js@1.0.5";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 type ParsedAddress = {
