@@ -9,7 +9,7 @@ window.PostalAddress = (() => {
     return String(value ?? "").normalize("NFKC").replace(/[　\s]+/g, "").replace(/臺/g, "台");
   }
   function parse(raw) {
-    const input = normalize(raw);
+    const input = normalize(raw).replace(/^\d{3,6}(?=[^\d])/, "");
     const cityMatch = input.match(/^(.*?[縣市])/);
     let city = cityMatch?.[1] ?? "";
     let rest = city ? input.slice(city.length) : input;
