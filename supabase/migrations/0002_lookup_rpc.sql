@@ -1,6 +1,6 @@
 create or replace function postal.lookup_zipcode_33(
   p_city text, p_district text, p_street text, p_sector text,
-  p_neighborhood integer, p_lane integer, p_alley integer,
+  p_neighborhood integer, p_lane text, p_alley integer,
   p_house_number integer, p_house_number_sub integer,
   p_number_type integer, p_record_type integer, p_floor integer
 ) returns table(zip_code text, city_name text, district_name text, street_name text, sector text, source_detail text)
@@ -21,10 +21,10 @@ language sql stable security definer set search_path = postal, pg_temp as $$
     and (p_street = '' or ps.street_name = p_street)
     and (p_sector = '' or ps.sector = '0' or ps.sector = p_sector)
     and (p_neighborhood = -1 or p_neighborhood = ps.neighborhood or (p_neighborhood between ps.neighborhood_from and ps.neighborhood_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
-    and (p_lane = -1 or p_lane = ps.lane or (p_lane between ps.lane_from and ps.lane_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
-    and ((p_lane <> -1 and ps.record_type = p_record_type - 1 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type)) or p_alley = -1 or p_alley = ps.alley or (p_alley between ps.alley_from and ps.alley_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
+    and (p_lane = '-1' or p_lane = ps.lane or (p_lane ~ '^[0-9]+$' and p_lane::integer between ps.lane_from and ps.lane_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
+    and ((p_lane <> '-1' and ps.record_type = p_record_type - 1 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type)) or p_alley = -1 or p_alley = ps.alley or (p_alley between ps.alley_from and ps.alley_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
   order by ps.zip_code;
 $$;
-revoke all on function postal.lookup_zipcode_33(text,text,text,text,integer,integer,integer,integer,integer,integer,integer,integer) from public;
+revoke all on function postal.lookup_zipcode_33(text,text,text,text,integer,text,integer,integer,integer,integer,integer,integer) from public;
 grant usage on schema postal to anon;
 grant execute on function postal.lookup_zipcode_33(text,text,text,text,integer,integer,integer,integer,integer,integer,integer,integer) to anon;

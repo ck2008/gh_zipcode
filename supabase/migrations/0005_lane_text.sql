@@ -1,6 +1,11 @@
-alter table postal.post_street add column if not exists floor_from integer;
+-- SQL Server stores post_street.lane as varchar: named lanes such as「厚生巷」are valid.
+-- This migration also replaces the RPC signatures so the browser can send text lanes.
+drop function if exists public.lookup_zipcode_33(text,text,text,text,integer,integer,integer,integer,integer,integer,integer,integer);
+drop function if exists postal.lookup_zipcode_33(text,text,text,text,integer,integer,integer,integer,integer,integer,integer,integer);
 
-create or replace function postal.lookup_zipcode_33(
+alter table postal.post_street alter column lane type text using lane::text;
+
+create function postal.lookup_zipcode_33(
   p_city text, p_district text, p_street text, p_sector text,
   p_neighborhood integer, p_lane text, p_alley integer,
   p_house_number integer, p_house_number_sub integer,
@@ -18,3 +23,17 @@ language sql stable security definer set search_path = postal, pg_temp as $$
     and ((p_lane <> '-1' and ps.record_type = p_record_type - 1 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type)) or p_alley = -1 or p_alley = ps.alley or (p_alley between ps.alley_from and ps.alley_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
   order by ps.zip_code;
 $$;
+
+revoke all on function postal.lookup_zipcode_33(text,text,text,text,integer,text,integer,integer,integer,integer,integer,integer) from public;
+
+create function public.lookup_zipcode_33(
+  p_city text, p_district text, p_street text, p_sector text,
+  p_neighborhood integer, p_lane text, p_alley integer,
+  p_house_number integer, p_house_number_sub integer,
+  p_number_type integer, p_record_type integer, p_floor integer
+) returns table(zip_code text, city_name text, district_name text, street_name text, sector text, source_detail text)
+language sql stable security definer set search_path = postal, pg_temp as $$
+  select * from postal.lookup_zipcode_33(p_city, p_district, p_street, p_sector, p_neighborhood, p_lane, p_alley, p_house_number, p_house_number_sub, p_number_type, p_record_type, p_floor);
+$$;
+
+grant execute on function public.lookup_zipcode_33(text,text,text,text,integer,text,integer,integer,integer,integer,integer,integer) to anon;

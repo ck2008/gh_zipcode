@@ -11,7 +11,7 @@ create table if not exists postal.post_street (
   neighborhood integer,
   neighborhood_from integer,
   neighborhood_end integer,
-  lane integer,
+  lane text,
   lane_from integer,
   lane_end integer,
   alley integer,

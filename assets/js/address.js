@@ -24,7 +24,7 @@ window.PostalAddress = (() => {
     const sector = sectorMatch ? String(chineseNumber(sectorMatch[1])) : "";
     rest = sectorMatch ? rest.slice(sectorMatch[0].length) : rest;
     const neighborhood = intValue(rest.match(/(\d+)鄰/)?.[1]);
-    const lane = intValue(rest.match(/(\d+)巷/)?.[1]);
+    const lane = rest.match(/([^弄號樓]+)巷/)?.[1] ?? "-1";
     const alley = intValue(rest.match(/(\d+)弄/)?.[1]);
     const house = intValue(rest.match(/(\d+)號/)?.[1] ?? rest.match(/(\d+)之/)?.[1]);
     const houseSub = intValue(rest.match(/之(\d+)/)?.[1]);
@@ -37,9 +37,9 @@ window.PostalAddress = (() => {
       baseline,
       { ...baseline, floor: -1 },
       { ...baseline, floor: -1, house: -1, numberType: parsed.alley === -1 ? 0 : parsed.alley % 2 === 0 ? 2 : 1, recordType: 3 },
-      { ...baseline, floor: -1, house: -1, alley: -1, numberType: parsed.lane === -1 ? 0 : parsed.lane % 2 === 0 ? 2 : 1, recordType: 2 },
-      { ...baseline, floor: -1, house: -1, alley: -1, lane: -1, numberType: 2, recordType: 1 },
-      { ...baseline, floor: -1, house: -1, alley: -1, lane: -1, neighborhood: -1, numberType: 2, recordType: 1 }
+      { ...baseline, floor: -1, house: -1, alley: -1, numberType: !/^\d+$/.test(parsed.lane) ? 0 : Number(parsed.lane) % 2 === 0 ? 2 : 1, recordType: 2 },
+      { ...baseline, floor: -1, house: -1, alley: -1, lane: "-1", numberType: 2, recordType: 1 },
+      { ...baseline, floor: -1, house: -1, alley: -1, lane: "-1", neighborhood: -1, numberType: 2, recordType: 1 }
     ];
   }
   return { normalize, parse, attempts };
