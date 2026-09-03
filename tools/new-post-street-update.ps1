@@ -7,7 +7,7 @@ param(
 $columns = @(
   'legacy_id','zip_code','district_id','city_name','district_name','street_name','sector',
   'neighborhood','neighborhood_from','neighborhood_end','lane','lane_from','lane_end',
-  'alley','alley_from','alley_end','house_number','house_number_sub','floor',
+  'alley','alley_from','alley_end','house_number','house_number_sub','floor','floor_from',
   'house_number_from','house_number_from_sub','house_number_end','house_number_end_sub',
   'floor_end','scope','number_type','record_type','source_detail','source_version'
 )
@@ -15,7 +15,7 @@ $numericColumns = @{
   legacy_id = $true; district_id = $true; neighborhood = $true; neighborhood_from = $true;
   neighborhood_end = $true; lane = $true; lane_from = $true; lane_end = $true; alley = $true;
   alley_from = $true; alley_end = $true; house_number = $true; house_number_sub = $true;
-  floor = $true; house_number_from = $true; house_number_from_sub = $true; house_number_end = $true;
+  floor = $true; floor_from = $true; house_number_from = $true; house_number_from_sub = $true; house_number_end = $true;
   house_number_end_sub = $true; floor_end = $true; scope = $true; number_type = $true; record_type = $true
 }
 $updateColumns = $columns | Where-Object { $_ -ne 'legacy_id' } | ForEach-Object { "$_ = excluded.$_" }

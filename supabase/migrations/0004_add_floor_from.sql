@@ -1,3 +1,5 @@
+alter table postal.post_street add column if not exists floor_from integer;
+
 create or replace function postal.lookup_zipcode_33(
   p_city text, p_district text, p_street text, p_sector text,
   p_neighborhood integer, p_lane integer, p_alley integer,
@@ -9,22 +11,10 @@ language sql stable security definer set search_path = postal, pg_temp as $$
   from postal.post_street ps
   where
     (p_floor = -1 or p_floor = ps.floor or p_floor between ps.floor_from and ps.floor_end)
-    and (
-      (p_alley <> -1 and ps.record_type = p_record_type + 3 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type))
-      or (p_lane <> -1 and ps.record_type = p_record_type + 2 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type))
-      or p_house_number = -1
-      or (p_house_number = ps.house_number and (p_house_number_sub = -1 or ps.house_number_sub = p_house_number_sub or p_house_number_sub between ps.house_number_from_sub and ps.house_number_end_sub))
-      or (p_house_number between ps.house_number_from and ps.house_number_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type)))
-    )
-    and (p_city = '' or ps.city_name = p_city)
-    and (p_district = '' or ps.district_name = p_district)
-    and (p_street = '' or ps.street_name = p_street)
-    and (p_sector = '' or ps.sector = '0' or ps.sector = p_sector)
+    and ((p_alley <> -1 and ps.record_type = p_record_type + 3 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type)) or (p_lane <> -1 and ps.record_type = p_record_type + 2 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type)) or p_house_number = -1 or (p_house_number = ps.house_number and (p_house_number_sub = -1 or ps.house_number_sub = p_house_number_sub or p_house_number_sub between ps.house_number_from_sub and ps.house_number_end_sub)) or (p_house_number between ps.house_number_from and ps.house_number_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
+    and (p_city = '' or ps.city_name = p_city) and (p_district = '' or ps.district_name = p_district) and (p_street = '' or ps.street_name = p_street) and (p_sector = '' or ps.sector = '0' or ps.sector = p_sector)
     and (p_neighborhood = -1 or p_neighborhood = ps.neighborhood or (p_neighborhood between ps.neighborhood_from and ps.neighborhood_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
     and (p_lane = -1 or p_lane = ps.lane or (p_lane between ps.lane_from and ps.lane_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
     and ((p_lane <> -1 and ps.record_type = p_record_type - 1 and ps.scope = 1 and (ps.number_type = 0 or ps.number_type = p_number_type)) or p_alley = -1 or p_alley = ps.alley or (p_alley between ps.alley_from and ps.alley_end and (ps.number_type = 0 or (ps.number_type = p_number_type and ps.record_type = p_record_type))))
   order by ps.zip_code;
 $$;
-revoke all on function postal.lookup_zipcode_33(text,text,text,text,integer,integer,integer,integer,integer,integer,integer,integer) from public;
-grant usage on schema postal to anon;
-grant execute on function postal.lookup_zipcode_33(text,text,text,text,integer,integer,integer,integer,integer,integer,integer,integer) to anon;

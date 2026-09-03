@@ -20,6 +20,7 @@ create table if not exists postal.post_street (
   house_number integer,
   house_number_sub integer,
   floor integer,
+  floor_from integer,
   house_number_from integer,
   house_number_from_sub integer,
   house_number_end integer,

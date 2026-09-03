@@ -6,7 +6,7 @@ param(
 $columns = @(
   'legacy_id','zip_code','district_id','city_name','district_name','street_name','sector',
   'neighborhood','neighborhood_from','neighborhood_end','lane','lane_from','lane_end',
-  'alley','alley_from','alley_end','house_number','house_number_sub','floor',
+  'alley','alley_from','alley_end','house_number','house_number_sub','floor','floor_from',
   'house_number_from','house_number_from_sub','house_number_end','house_number_end_sub',
   'floor_end','scope','number_type','record_type','source_detail','source_version'
 )
@@ -24,7 +24,7 @@ $command.CommandTimeout = 0
 $command.CommandText = @"
 select id as legacy_id, zip_code, district_id, city_name, district_name, street_name, sector,
        neighborhood, neighborhood_from, neighborhood_end, lane, lane_from, lane_end,
-       alley, alley_from, alley_end, house_number, house_number_sub, floor,
+       alley, alley_from, alley_end, house_number, house_number_sub, floor, floor_from,
        house_number_from, house_number_from_sub, house_number_end, house_number_end_sub,
        floor_end, scope, number_type, record_type, source_detail,
        convert(varchar(19), getdate(), 120) as source_version
