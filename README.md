@@ -20,6 +20,20 @@
 
 首版僅提供 3+3；3+2 資料尚未匯入。
 
+## 使用者留言
+
+首頁下方的留言區以 `supabase/migrations/0007_guestbook.sql` 建立，資料表在 `guestbook` schema，anon 只能透過三個 `security definer` 包裝函式存取：
+
+- `public.guestbook_new_captcha()`：發一組驗證碼，回傳 `token` 與 SVG。答案只留在 `guestbook.captcha`，不會傳到瀏覽器。
+- `public.guestbook_post_comment(token, answer, author, body)`：驗證後寫入留言，回傳 `pending`、`captcha_wrong`、`captcha_expired`、`empty` 或 `too_long`。
+- `public.guestbook_list_comments(limit)`：只回傳已核准的留言。
+
+驗證碼為 5 位數字（2-9），以 `<path>` 筆畫繪製而非 `<text>`，所以答案不會出現在 SVG 原始碼裡。每個 token 只能猜一次，答錯即失效。
+
+### 審核留言
+
+留言預設 `is_approved = false`，不會顯示在頁面上。到 Supabase Table Editor 的 `guestbook.comment` 把要公開的那筆改成 `is_approved = true`（或在 SQL Editor 執行 `update guestbook.comment set is_approved = true where id = <id>;`）。刪除留言直接刪該列即可。
+
 ## 公開 API（免 key）
 
 ```

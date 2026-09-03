@@ -6,25 +6,21 @@ window.PostalApi = (() => {
     }
     return config;
   }
-  async function lookup(values) {
+  async function rpc(name, body, label = "查詢") {
     const config = requireConfig();
-    const response = await fetch(`${config.supabaseUrl}/rest/v1/rpc/lookup_zipcode_33`, {
+    const response = await fetch(`${config.supabaseUrl}/rest/v1/rpc/${name}`, {
       method: "POST",
       headers: { "apikey": config.supabaseAnonKey, "Authorization": `Bearer ${config.supabaseAnonKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_city: values.city, p_district: values.district, p_street: values.street, p_sector: values.sector, p_neighborhood: values.neighborhood, p_lane: values.lane, p_alley: values.alley, p_house_number: values.house, p_house_number_sub: values.houseSub, p_number_type: values.numberType, p_record_type: values.recordType, p_floor: values.floor })
+      body: JSON.stringify(body)
     });
-    if (!response.ok) throw new Error(`查詢失敗（${response.status}）`);
+    if (!response.ok) throw new Error(`${label}失敗（${response.status}）`);
     return response.json();
   }
-  async function lookupStreet(values) {
-    const config = requireConfig();
-    const response = await fetch(`${config.supabaseUrl}/rest/v1/rpc/lookup_zipcode_street`, {
-      method: "POST",
-      headers: { "apikey": config.supabaseAnonKey, "Authorization": `Bearer ${config.supabaseAnonKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_city: values.city, p_district: values.district, p_street: values.street, p_sector: values.sector })
-    });
-    if (!response.ok) throw new Error(`查詢失敗（${response.status}）`);
-    return response.json();
+  function lookup(values) {
+    return rpc("lookup_zipcode_33", { p_city: values.city, p_district: values.district, p_street: values.street, p_sector: values.sector, p_neighborhood: values.neighborhood, p_lane: values.lane, p_alley: values.alley, p_house_number: values.house, p_house_number_sub: values.houseSub, p_number_type: values.numberType, p_record_type: values.recordType, p_floor: values.floor });
+  }
+  function lookupStreet(values) {
+    return rpc("lookup_zipcode_street", { p_city: values.city, p_district: values.district, p_street: values.street, p_sector: values.sector });
   }
   async function lookupWithFallback(address) {
     const parsed = PostalAddress.parse(address);
@@ -40,5 +36,5 @@ window.PostalApi = (() => {
     }
     return { parsed, rows: [] };
   }
-  return { lookupWithFallback };
+  return { lookupWithFallback, rpc };
 })();

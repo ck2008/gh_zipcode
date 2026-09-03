@@ -12,4 +12,15 @@
     <p><strong>範例：</strong><a href="https://skubqoeizqgbixaaxfeq.supabase.co/functions/v1/zipcode?adrs=%E8%87%BA%E5%8C%97%E5%B8%82%E4%BF%A1%E7%BE%A9%E8%B7%AF%E4%BA%94%E6%AE%B57%E8%99%9F" target="_blank" rel="noopener">查詢「臺北市信義路五段7號」</a></p>
     <ul><li><code>adrs</code>：必填，UTF-8 地址，最長 200 字元。</li><li><code>zipcode6</code>：第一筆命中的 3+3 郵遞區號；<code>results</code>：全部命中範圍。</li><li>回傳欄位只有 <code>adrs</code>、<code>zipcode6</code>、<code>dataver6</code>、<code>results</code>。</li><li>每個來源每分鐘最多 30 次；請勿作大量批次查詢。</li></ul>
   </section>
-</main><script src="assets/vendor/opencc-full.js?v=1"></script><script src="assets/js/config.js"></script><script src="assets/js/address.js?v=5"></script><script src="assets/js/supabase-client.js?v=2"></script><script src="assets/js/app.js"></script></body></html>
+  <section class="guestbook" aria-labelledby="guestbook-title">
+    <h2 id="guestbook-title">使用者留言</h2>
+    <form id="comment-form">
+      <p class="field"><label for="comment-author">暱稱：</label><input id="comment-author" maxlength="40" autocomplete="nickname" required></p>
+      <p class="field"><label for="comment-body">留言：</label><textarea id="comment-body" rows="4" maxlength="1000" required></textarea></p>
+      <p class="field captcha"><label for="comment-captcha">驗證碼：</label><span id="captcha-image" class="captcha-image" aria-live="polite"></span><button type="button" id="captcha-reload">重新產生</button><input id="comment-captcha" maxlength="8" autocomplete="off" spellcheck="false" required></p>
+      <p class="field actions"><button type="submit">送出留言</button></p>
+    </form>
+    <p id="comment-status" role="status"></p>
+    <ul id="comment-list" class="comment-list"></ul>
+  </section>
+</main><script src="assets/vendor/opencc-full.js?v=1"></script><script src="assets/js/config.js"></script><script src="assets/js/address.js?v=5"></script><script src="assets/js/supabase-client.js?v=2"></script><script src="assets/js/app.js"></script><script src="assets/js/guestbook.js"></script></body></html>
