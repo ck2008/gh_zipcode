@@ -37,3 +37,4 @@ language sql stable security definer set search_path = postal, pg_temp as $$
 $$;
 
 grant execute on function public.lookup_zipcode_33(text,text,text,text,integer,text,integer,integer,integer,integer,integer,integer) to anon;
+notify pgrst, 'reload schema';
