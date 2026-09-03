@@ -126,6 +126,13 @@ Deno.serve(async (request) => {
     if (error) return json({ error: "資料庫查詢失敗。" }, 500);
     if (data?.length) { rows = data; break; }
   }
+  if (!rows.length && parsed.city && parsed.district && parsed.street) {
+    const { data, error } = await client.rpc("lookup_zipcode_street", {
+      p_city: parsed.city, p_district: parsed.district, p_street: parsed.street, p_sector: parsed.sector,
+    });
+    if (error) return json({ error: "資料庫查詢失敗。" }, 500);
+    rows = data ?? [];
+  }
   const first = rows[0];
   return json({
     adrs,
