@@ -16,9 +16,24 @@ window.PostalApi = (() => {
     if (!response.ok) throw new Error(`查詢失敗（${response.status}）`);
     return response.json();
   }
+  async function lookupStreet(values) {
+    const config = requireConfig();
+    const response = await fetch(`${config.supabaseUrl}/rest/v1/rpc/lookup_zipcode_street`, {
+      method: "POST",
+      headers: { "apikey": config.supabaseAnonKey, "Authorization": `Bearer ${config.supabaseAnonKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_city: values.city, p_district: values.district, p_street: values.street, p_sector: values.sector })
+    });
+    if (!response.ok) throw new Error(`查詢失敗（${response.status}）`);
+    return response.json();
+  }
   async function lookupWithFallback(address) {
     const parsed = PostalAddress.parse(address);
     if (!parsed.city && !parsed.district && !parsed.street) return { parsed, rows: [] };
+    if (parsed.house === -1 && parsed.city && parsed.district && parsed.street) {
+      const rows = await lookupStreet(parsed);
+      if (rows.length || !parsed.streetFallback || parsed.streetFallback === parsed.street) return { parsed, rows };
+      return { parsed, rows: await lookupStreet({ ...parsed, street: parsed.streetFallback }) };
+    }
     for (const attempt of PostalAddress.attempts(parsed)) {
       const rows = await lookup(attempt);
       if (rows.length) return { parsed, rows };
