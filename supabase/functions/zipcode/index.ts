@@ -125,15 +125,8 @@ Deno.serve(async (request) => {
     if (data?.length) { rows = data; break; }
   }
   const first = rows[0];
-  const normalizedAddress = `${parsed.city}${parsed.district}${parsed.street}${parsed.sector ? `${parsed.sector}段` : ""}${parsed.house === -1 ? "" : `${parsed.house}${parsed.houseSub === -1 ? "" : `之${parsed.houseSub}`}號`}${parsed.floor === -1 ? "" : `${parsed.floor}樓`}`;
   return json({
     adrs,
-    new_adrs: adrs,
-    new_adrs2: adrs,
-    zipcode: "",
-    dataver: null,
-    new_adrs6: first ? `${first.zip_code}${normalizedAddress}` : adrs,
-    new_adrs6_2: first ? `${first.zip_code}${adrs}` : adrs,
     zipcode6: first?.zip_code ?? "",
     dataver6: "post_street",
     results: rows,

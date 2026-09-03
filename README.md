@@ -26,4 +26,4 @@
 GET https://skubqoeizqgbixaaxfeq.supabase.co/functions/v1/zipcode?adrs=<UTF-8 地址>
 ```
 
-回傳相容於 `zip5json.py` 的 `adrs`、`new_adrs`、`new_adrs2`、`zipcode`、`dataver`、`new_adrs6`、`new_adrs6_2`、`zipcode6`、`dataver6` 欄位，並額外提供 `results` 陣列以列出全部命中範圍。目前只匯入 3+3 資料，因此 3+2 對應欄位為空字串或 `null`。API 每個來源每分鐘最多 30 次；請勿將它作為大量批次查詢介面。
+回傳四個欄位：`adrs`（原輸入地址）、`zipcode6`（第一筆命中的 3+3 郵遞區號）、`dataver6`（資料版本）與 `results`（全部命中範圍）。API 每個來源每分鐘最多 30 次；請勿將它作為大量批次查詢介面。
