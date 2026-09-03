@@ -34,6 +34,22 @@
 
 留言預設 `is_approved = false`，不會顯示在頁面上。到 Supabase Table Editor 的 `guestbook.comment` 把要公開的那筆改成 `is_approved = true`（或在 SQL Editor 執行 `update guestbook.comment set is_approved = true where id = <id>;`）。刪除留言直接刪該列即可。
 
+### 審核介面
+
+`admin/` 是審核頁，資料只有 GitHub 帳號 `ck2008`（numeric id `11531735`）看得到。
+
+首次啟用需要三個手動步驟（含 client secret，必須自己填）：
+
+1. GitHub → Settings → Developer settings → **OAuth Apps** → New OAuth App。Homepage 填 `https://ck2008.github.io/gh_zipcode/`，Authorization callback URL 填 `https://skubqoeizqgbixaaxfeq.supabase.co/auth/v1/callback`。
+2. Supabase → Authentication → Providers → **GitHub**，開啟並填入 Client ID 與 Client Secret。
+3. Supabase → Authentication → URL Configuration → **Redirect URLs** 加入 `https://ck2008.github.io/gh_zipcode/admin/`。
+
+權限檢查在 `guestbook.is_admin()`，比對 `auth.identities.provider_id`，**不是** JWT 裡的 `user_metadata.user_name`——後者使用者可以自行改寫，用它把關等於沒把關。要換帳號就改 `0008_guestbook_admin.sql` 裡的 numeric id 重跑。
+
+三個 RPC（`guestbook_admin_list`、`guestbook_admin_set_approved`、`guestbook_admin_delete`）只授權給 `authenticated`，anon 直接被 Postgres 擋在 `permission denied`；登入後再由 `is_admin()` 收斂到單一帳號。
+
+注意：`admin/index.html` 與 `admin.js` 本身是 GitHub Pages 上的靜態檔案，任何人都能下載原始碼。受保護的是**留言資料與核准／刪除動作**，由資料庫端強制，不是靠藏頁面。
+
 ## 公開 API（免 key）
 
 ```
