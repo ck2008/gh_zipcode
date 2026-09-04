@@ -103,17 +103,16 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: corsHeaders });
 }
 
-Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (request.method !== "GET") return json({ error: "只支援 GET" }, 405);
-  if (!allow(request)) return json({ error: "查詢太頻繁，請稍後再試。" }, 429);
+type Outcome = { status: number; body: Record<string, unknown> };
 
-  const adrs = new URL(request.url).searchParams.get("adrs")?.trim() ?? "";
-  if (!adrs) return json({ error: "請提供 adrs 參數。" }, 400);
-  if (adrs.length > 200) return json({ error: "adrs 最長 200 個字元。" }, 400);
+async function handle(request: Request, adrs: string): Promise<Outcome> {
+  if (request.method !== "GET") return { status: 405, body: { error: "只支援 GET" } };
+  if (!allow(request)) return { status: 429, body: { error: "查詢太頻繁，請稍後再試。" } };
+  if (!adrs) return { status: 400, body: { error: "請提供 adrs 參數。" } };
+  if (adrs.length > 200) return { status: 400, body: { error: "adrs 最長 200 個字元。" } };
 
   const parsed = parseAddress(adrs);
-  if (!parsed.city && !parsed.district && !parsed.street) return json({ error: "無法辨識地址。" }, 400);
+  if (!parsed.city && !parsed.district && !parsed.street) return { status: 400, body: { error: "無法辨識地址。" } };
   const client = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   let rows: Array<Record<string, string>> = [];
   for (const attempt of attempts(parsed)) {
@@ -123,21 +122,48 @@ Deno.serve(async (request) => {
       p_house_number: attempt.house, p_house_number_sub: attempt.houseSub, p_number_type: attempt.numberType,
       p_record_type: attempt.recordType, p_floor: attempt.floor,
     });
-    if (error) return json({ error: "資料庫查詢失敗。" }, 500);
+    if (error) return { status: 500, body: { error: "資料庫查詢失敗。" } };
     if (data?.length) { rows = data; break; }
   }
   if (!rows.length && parsed.city && parsed.district && parsed.street) {
     const { data, error } = await client.rpc("lookup_zipcode_street", {
       p_city: parsed.city, p_district: parsed.district, p_street: parsed.street, p_sector: parsed.sector,
     });
-    if (error) return json({ error: "資料庫查詢失敗。" }, 500);
+    if (error) return { status: 500, body: { error: "資料庫查詢失敗。" } };
     rows = data ?? [];
   }
   const first = rows[0];
-  return json({
-    adrs,
-    zipcode6: first?.zip_code ?? "",
-    dataver6: "post_street",
-    results: rows,
-  });
+  return {
+    status: 200,
+    body: { adrs, zipcode6: first?.zip_code ?? "", dataver6: "post_street", results: rows },
+  };
+}
+
+// Logging must never change what the caller gets back, so every failure here
+// is swallowed -- a broken log is not a reason to fail a lookup.
+async function logCall(request: Request, adrs: string, outcome: Outcome, ms: number) {
+  try {
+    const results = outcome.body.results;
+    await createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
+      .rpc("api_log_write", {
+        p_ip: request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "",
+        p_adrs: adrs,
+        p_status: outcome.status,
+        p_zipcode6: typeof outcome.body.zipcode6 === "string" ? outcome.body.zipcode6 : "",
+        p_result_count: Array.isArray(results) ? results.length : 0,
+        p_duration_ms: ms,
+        p_user_agent: request.headers.get("user-agent") ?? "",
+      });
+  } catch (_) {
+    // ignored on purpose
+  }
+}
+
+Deno.serve(async (request) => {
+  if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const startedAt = Date.now();
+  const adrs = new URL(request.url).searchParams.get("adrs")?.trim() ?? "";
+  const outcome = await handle(request, adrs);
+  await logCall(request, adrs, outcome, Date.now() - startedAt);
+  return json(outcome.body, outcome.status);
 });

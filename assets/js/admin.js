@@ -7,6 +7,10 @@
   const panel = document.querySelector("#admin-panel");
   const rows = document.querySelector("#admin-rows");
   const count = document.querySelector("#admin-count");
+  const apiPanel = document.querySelector("#api-panel");
+  const apiStats = document.querySelector("#api-stats");
+  const apiRows = document.querySelector("#api-rows");
+  const apiCount = document.querySelector("#api-count");
   const STORE = "guestbook_admin_token";
   const redirectTo = location.href.split("#")[0].split("?")[0];
 
@@ -75,14 +79,51 @@
     }
   }
 
+  function renderApi(stats, calls) {
+    apiStats.replaceChildren();
+    for (const s of stats) {
+      const tr = document.createElement("tr");
+      addCell(tr, s.bucket);
+      addCell(tr, s.calls);
+      addCell(tr, s.ips);
+      addCell(tr, s.errors);
+      apiStats.append(tr);
+    }
+    apiRows.replaceChildren();
+    apiCount.textContent = String(calls.length);
+    for (const c of calls) {
+      const tr = document.createElement("tr");
+      addCell(tr, new Date(c.at).toLocaleString("zh-TW"));
+      addCell(tr, c.ip);
+      addCell(tr, c.adrs);
+      addCell(tr, c.status);
+      addCell(tr, c.zipcode6);
+      addCell(tr, c.result_count);
+      addCell(tr, c.duration_ms);
+      if (c.status >= 400) tr.classList.add("row-error");
+      apiRows.append(tr);
+    }
+  }
+
+  async function loadApi() {
+    const [stats, calls] = await Promise.all([
+      rpc("admin_api_stats", {}),
+      rpc("admin_api_log", { p_limit: 100 }),
+    ]);
+    renderApi(stats, calls);
+    apiPanel.hidden = false;
+  }
+
   async function load() {
     status.textContent = "載入中…";
     try {
       render(await rpc("guestbook_admin_list", { p_limit: 200 }));
       status.textContent = "";
       panel.hidden = false;
+      await loadApi();
     } catch (error) {
       panel.hidden = true;
+      apiPanel.hidden = true;
       status.textContent = error.message;
       if (!token()) showSignedOut();
     }
@@ -93,6 +134,7 @@
     signOut.hidden = true;
     who.textContent = "";
     panel.hidden = true;
+    apiPanel.hidden = true;
   }
 
   signIn.addEventListener("click", () => {

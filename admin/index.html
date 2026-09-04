@@ -9,6 +9,13 @@
     <h2>全部留言 <span id="admin-count">0</span> 筆</h2>
     <div class="table-wrap"><table><thead><tr><th>ID</th><th>狀態</th><th>暱稱</th><th>留言</th><th>時間</th><th>操作</th></tr></thead><tbody id="admin-rows"></tbody></table></div>
   </section>
+  <section id="api-panel" hidden>
+    <h2>API 呼叫紀錄</h2>
+    <div class="table-wrap"><table><thead><tr><th>期間</th><th>呼叫數</th><th>不同 IP</th><th>錯誤</th></tr></thead><tbody id="api-stats"></tbody></table></div>
+    <h3>最近 <span id="api-count">0</span> 筆</h3>
+    <div class="table-wrap"><table><thead><tr><th>時間</th><th>來源 IP</th><th>查詢地址</th><th>狀態</th><th>郵遞區號</th><th>筆數</th><th>ms</th></tr></thead><tbody id="api-rows"></tbody></table></div>
+    <p class="hint">保留 30 天，逾期自動清除。</p>
+  </section>
   <p class="hint"><a href="../">回到查詢頁</a></p>
 </main>
 <script src="../assets/js/config.js"></script>
