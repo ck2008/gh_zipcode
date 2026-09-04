@@ -1,10 +1,27 @@
 <!doctype html>
 <html lang="zh-Hant">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>台灣 3+3 郵遞區號查詢</title><link rel="stylesheet" href="assets/css/app.css"></head>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>台灣 3+3 郵遞區號查詢｜六碼郵遞區號與免費 API</title>
+<meta name="description" content="免費查詢台灣 3+3 郵遞區號（六碼郵遞區號）。輸入完整地址即可查出對應區號與適用範圍，並提供免 API key 的公開查詢 API，支援繁體與簡體中文地址。">
+<link rel="canonical" href="https://ck2008.github.io/gh_zipcode/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="台灣 3+3 郵遞區號查詢">
+<meta property="og:title" content="台灣 3+3 郵遞區號查詢｜六碼郵遞區號與免費 API">
+<meta property="og:description" content="免費查詢台灣 3+3 郵遞區號（六碼郵遞區號）。輸入完整地址即可查出對應區號與適用範圍，並提供免 API key 的公開查詢 API，支援繁體與簡體中文地址。">
+<meta property="og:url" content="https://ck2008.github.io/gh_zipcode/">
+<meta property="og:locale" content="zh_TW">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/app.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"台灣 3+3 郵遞區號查詢","url":"https://ck2008.github.io/gh_zipcode/","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","inLanguage":"zh-Hant-TW","description":"免費查詢台灣 3+3 郵遞區號（六碼郵遞區號）。輸入完整地址即可查出對應區號與適用範圍，並提供免 API key 的公開查詢 API，支援繁體與簡體中文地址。","offers":{"@type":"Offer","price":"0","priceCurrency":"TWD"},"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://ck2008.github.io/gh_zipcode/prog1/?qry_addr={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
+</head>
 <body><main>
   <header><h1>台灣 3+3 郵遞區號 查詢</h1></header>
   <form id="address-form"><label for="qry_addr">輸入地址:</label><input id="qry_addr" autocomplete="street-address" autofocus><button>查詢</button></form>
   <p class="hint">輸入完整地址可獲得較精確的 3+3 結果。</p>
+  <p class="lead">本站提供台灣（中華郵政）3+3 郵遞區號查詢，也就是六碼郵遞區號。輸入縣市、行政區、路名與門牌後，會列出對應的郵遞區號與適用範圍；同一條路的不同門牌區間可能屬於不同區號，因此地址越完整結果越精確。另提供免 API key 的公開查詢介面，可直接在程式中呼叫。</p>
   <section class="api-guide" aria-labelledby="api-title">
     <h2 id="api-title">API 使用說明</h2>
     <p>可免 API key 直接以 <code>GET</code> 呼叫，支援 CORS 與繁、簡體中文地址。</p>
