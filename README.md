@@ -101,6 +101,12 @@ supabase functions deploy zipcode
 
 ngrok 不再需要，function URL 是固定的，本機關機也不影響。
 
+首頁的「用 LINE 查詢」區塊放了加好友的 QR code。`assets/line-qr.svg` 是離線產生後直接進版控的，不是外連 LINE 的圖，所以頁面不依賴第三方主機。內容是 `https://line.me/R/ti/p/@435xgkgm`，換帳號時重新產一份：
+
+```powershell
+deno eval "import QRCode from 'npm:qrcode@1.5.4'; await Deno.writeTextFile('assets/line-qr.svg', await QRCode.toString('https://line.me/R/ti/p/@<新的 basic ID>', { type: 'svg', errorCorrectionLevel: 'M', margin: 1, width: 320 }))"
+```
+
 ### 行為
 
 - 文字訊息當地址查詢；貼圖、圖片與 `follow`、`join` 事件回使用說明。

@@ -22,6 +22,17 @@
   <form id="address-form"><label for="qry_addr">輸入地址:</label><input id="qry_addr" autocomplete="street-address" autofocus><button>查詢</button></form>
   <p class="hint">輸入完整地址可獲得較精確的 3+3 結果。</p>
   <p class="lead">本站提供台灣（中華郵政）3+3 郵遞區號查詢，也就是六碼郵遞區號。輸入縣市、行政區、路名與門牌後，會列出對應的郵遞區號與適用範圍；同一條路的不同門牌區間可能屬於不同區號，因此地址越完整結果越精確。另提供免 API key 的公開查詢介面，可直接在程式中呼叫。</p>
+  <section class="line-bot" aria-labelledby="line-title">
+    <h2 id="line-title">用 LINE 查詢</h2>
+    <div class="line-bot-body">
+      <a class="line-qr" href="https://line.me/R/ti/p/@435xgkgm" target="_blank" rel="noopener"><img src="assets/line-qr.svg" width="160" height="160" alt="加 LINE 好友 @435xgkgm 的 QR code"></a>
+      <div>
+        <p>加官方帳號 <strong>@435xgkgm</strong> 為好友，把地址傳給它就會回覆 3+3 郵遞區號，和本頁查的是同一份資料。</p>
+        <p>電腦請用 LINE 掃左邊的 QR code，手機請點 <a href="https://line.me/R/ti/p/@435xgkgm" target="_blank" rel="noopener">這個加好友連結</a>。</p>
+        <p class="hint">同一個地址命中多組區號時，會列出門牌範圍讓你對照；超過 5 組會附上本站的查詢連結。</p>
+      </div>
+    </div>
+  </section>
   <section class="api-guide" aria-labelledby="api-title">
     <h2 id="api-title">API 使用說明</h2>
     <p>可免 API key 直接以 <code>GET</code> 呼叫，支援 CORS 與繁、簡體中文地址。</p>
