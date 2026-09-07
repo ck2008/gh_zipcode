@@ -4,3 +4,8 @@ project_id = "skubqoeizqgbixaaxfeq"
 # This is intentionally a public compatibility API.  The function has its own
 # input validation and lightweight per-instance rate limiter.
 verify_jwt = false
+
+[functions.linebot]
+# LINE posts the webhook with no Supabase JWT; the request is authenticated by
+# the x-line-signature HMAC instead, checked inside the function.
+verify_jwt = false

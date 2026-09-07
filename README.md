@@ -59,3 +59,38 @@ GET https://skubqoeizqgbixaaxfeq.supabase.co/functions/v1/zipcode?adrs=<UTF-8 �
 ```
 
 回傳四個欄位：`adrs`（原輸入地址）、`zipcode6`（第一筆命中的 3+3 郵遞區號）、`dataver6`（資料版本）與 `results`（全部命中範圍）。API 每個來源每分鐘最多 30 次；請勿將它作為大量批次查詢介面。
+
+## LINE bot
+
+LINE channel `zipcode`（`@435xgkgm`）的 webhook 也是同一個 Supabase 專案裡的 Edge Function：
+
+```
+POST https://skubqoeizqgbixaaxfeq.supabase.co/functions/v1/linebot
+```
+
+地址解析與查詢放在 `supabase/functions/_shared/zipcode.ts`，`zipcode`（HTTP API）與 `linebot`（LINE webhook）共用同一份，所以兩邊不可能對同一個地址給出不同答案。bot 不會繞回去打自己的公開 API——那樣所有 LINE 使用者會共用 Edge Function 的出口 IP，一起撞 30 次/分的上限。
+
+### 啟用
+
+1. 在 LINE Developers Console 的 Messaging API 分頁取得 Channel secret 與 Channel access token，設成 secret 後部署：
+
+```powershell
+supabase secrets set LINE_CHANNEL_SECRET=<channel secret> LINE_CHANNEL_ACCESS_TOKEN=<channel access token>
+supabase functions deploy linebot
+supabase functions deploy zipcode
+```
+
+`zipcode` 也要重新部署：它的解析邏輯已經搬到 `_shared/`。
+
+2. Console → Messaging API → Webhook settings：Webhook URL 換成上面那個 function URL，打開 **Use webhook**，按 **Verify** 應回 Success（Verify 送的是空 `events` 陣列，function 一樣回 200）。
+3. LINE Official Account Manager → 回應設定：關掉**自動回覆訊息**，否則官方罐頭訊息會壓過 bot 的回覆。
+
+ngrok 不再需要，function URL 是固定的，本機關機也不影響。
+
+### 行為
+
+- 文字訊息當地址查詢；貼圖、圖片與 `follow`、`join` 事件回使用說明。
+- 只命中一組就直接回那組郵遞區號；命中多組時列出前 5 組與門牌範圍讓使用者自己對。這是刻意的：RPC 是按郵遞區號排序而非精確度，`台北市信義路五段7號` 會同時命中「單 17號以下」（110014）與「7號」（110615），挑第一筆等於瞎猜。超過 5 組會附上網頁查詢連結。
+- 每個 LINE 使用者或群組每分鐘 20 次，按 sender 計而不是按 IP——所有 webhook 都來自 LINE 的伺服器，用 IP 分桶等於全部人共用一桶。
+- 簽章用 channel secret 對 **raw body** 做 HMAC-SHA256，與 `x-line-signature` 常數時間比對，不符回 401。所以這個 function 雖然 `verify_jwt = false`，實際上只有 LINE 打得進來。
+- 查詢一樣寫進 `apilog.call`，但 `ip` 欄位填字串 `line`，在審核頁的呼叫紀錄裡分得出哪些是 bot 來的。
