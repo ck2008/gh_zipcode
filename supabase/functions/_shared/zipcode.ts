@@ -26,6 +26,11 @@ export type Outcome = { status: number; body: Record<string, unknown> };
 
 const toTraditional = Converter({ from: "cn", to: "tw" });
 const WINDOW_MS = 60_000;
+// A ceiling for the whole project rather than per caller, counted in Postgres
+// so it holds across function instances -- see migration 0012.  120/min leaves
+// real use plenty of room (a page visit is one or two lookups) while bounding
+// what a burst from many addresses at once can cost.
+const GLOBAL_LIMIT_PER_MINUTE = 120;
 
 const cityAliases: Record<string, string> = {
   "台北市": "臺北市", "北市": "臺北市", "台中市": "臺中市", "中市": "臺中市",
@@ -107,6 +112,20 @@ export async function lookupZipcode(adrs: string): Promise<Outcome> {
   const parsed = parseAddress(adrs);
   if (!parsed.city && !parsed.district && !parsed.street) return { status: 400, body: { error: "無法辨識地址。" } };
   const client = serviceClient();
+  const limit = await client.rpc("api_take_token", { p_limit: GLOBAL_LIMIT_PER_MINUTE });
+  if (limit.error) {
+    // A missing function means migration 0012 has not been applied yet.  Log
+    // it and let the lookup through: an un-run migration should leave the
+    // ceiling unenforced, not take the whole API down.  Anything else really
+    // is the database failing.
+    if (limit.error.code === "PGRST202" || limit.error.code === "42883") {
+      console.error("api_take_token is missing; global limit not enforced");
+    } else {
+      return { status: 500, body: { error: "資料庫查詢失敗。" } };
+    }
+  } else if (limit.data !== true) {
+    return { status: 429, body: { error: "全站查詢量已達上限，請稍後再試。" } };
+  }
   let rows: LookupRow[] = [];
   for (const attempt of attempts(parsed)) {
     const { data, error } = await client.rpc("lookup_zipcode_33", {

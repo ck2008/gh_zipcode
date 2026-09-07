@@ -60,6 +60,20 @@ GET https://skubqoeizqgbixaaxfeq.supabase.co/functions/v1/zipcode?adrs=<UTF-8 �
 
 回傳四個欄位：`adrs`（原輸入地址）、`zipcode6`（第一筆命中的 3+3 郵遞區號）、`dataver6`（資料版本）與 `results`（全部命中範圍）。API 每個來源每分鐘最多 30 次；請勿將它作為大量批次查詢介面。
 
+### 三層限流
+
+| 層級 | 上限 | 記在哪 |
+|---|---|---|
+| 每個來源 IP（API） | 30 次/分 | Edge Function 記憶體 |
+| 每個 LINE sender（bot） | 20 次/分 | Edge Function 記憶體 |
+| 全站總量（API + bot） | 120 次/分 | Postgres，`0012_api_rate_limit.sql` |
+
+前兩層在 Edge Function 的記憶體裡，所以實際是「每個實例」各算一份，而且同一個人換 IP 就繞過了。真正封住同時間大量查詢的是第三層：`public.api_take_token()` 用 `apilog.rate_hit` 一分鐘一列，所有請求都會在那一列上排隊，跨實例算得準。額度用完回 429 `全站查詢量已達上限，請稍後再試。`，bot 則把同一句話回給使用者。
+
+限流點在 `lookupZipcode()` 裡、地址解析之後——認不出來的輸入會先拿 400，不會吃掉全站額度。上限數字是 `_shared/zipcode.ts` 的 `GLOBAL_LIMIT_PER_MINUTE`，改完重新部署兩個 function 即可；`api_take_token` 只授權給 `service_role`，anon 拿不到，所以沒辦法從瀏覽器塞一個大的 `p_limit` 進去。
+
+若 `0012` 還沒執行，function 會記一筆 `api_take_token is missing` 到日誌並照常查詢：沒跑的 migration 應該是「上限沒生效」，不是把整個 API 打掛。
+
 ## LINE bot
 
 LINE channel `zipcode`（`@435xgkgm`）的 webhook 也是同一個 Supabase 專案裡的 Edge Function：
